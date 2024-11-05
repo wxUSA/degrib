@@ -12,16 +12,12 @@ EXEEXT = @EXEEXT@
 LIB_DEP1 = @MEM_LIBDEP@
 
 LIB_DEPENDS = $(LIB_DEP1) \
-              ./zlib/libz.a \
-              ./zlib/contrib/minizip/libminizip.a \
-              ./libpng/libpng.a \
               ./jpeg2000/src/libjasper/jpc/.libs/libjpc.a \
               ./jpeg2000/src/libjasper/base/.libs/libbase.a \
               ./degrib-core/libdegrib-core.a \
               ./gd/libgd.a \
               ./emapf-c/libemapf.a \
-              ./netcdf/libsrc/libnetcdf.a \
-              ./libxml/.libs/libxml2.a
+              ./netcdf/libsrc/libnetcdf.a
 
 PRJ_NAME = @PACKAGE_NAME@
 

@@ -192,10 +192,9 @@ DP_MAIN = dpstart.c
 DRAWSHP_MAIN = drawshp.c
 
 LIB_DEPENDS = ../emapf-c/libemapf.a ../degrib-core/libdegrib-core.a \
-            ../libpng/libpng.a ../zlib/libz.a ../zlib/contrib/minizip/libminizip.a \
             ../jpeg2000/src/libjasper/jpc/.libs/libjpc.a \
             ../jpeg2000/src/libjasper/base/.libs/libbase.a \
-            ../netcdf/libsrc/libnetcdf.a ../gd/libgd.a $(XML_LIBDEP) @HALO_LIBDEP@
+            ../netcdf/libsrc/libnetcdf.a ../gd/libgd.a @HALO_LIBDEP@
 
 ############################
 # TARGETS
