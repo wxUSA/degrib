@@ -18,6 +18,7 @@
 #include "mapini.h"
 #include "drawlib.h"
 #include "myassert.h"
+#include "myutil.h"
 
 #include "clock.h"
 
@@ -1151,6 +1152,11 @@ static void DrawGrid (layerType *layer, maparam *map, gdImagePtr im,
 #ifdef DEBUG
    printf ("Arthur 2 :: %f\n", clock () / (double) (CLOCKS_PER_SEC));
 #endif
+   /* Initialize the lastPnts array */
+   lastPnts[0].x = -1; lastPnts[0].y = -1;
+   lastPnts[1].x = -1; lastPnts[1].y = -1;
+   lastPnts[2].x = -1; lastPnts[2].y = -1;
+   lastPnts[3].x = -1; lastPnts[3].y = -1;
 
    for (j = 1; j <= layer->gridNy; j++) {
       for (i = 1; i <= layer->gridNx; i++) {
@@ -1172,7 +1178,7 @@ static void DrawGrid (layerType *layer, maparam *map, gdImagePtr im,
              * For B) (max - min) / (# value - 1) = 9 / 3 = 2                                    
              */          
             step = (layer->ramp.max - layer->ramp.min) / (layer->ramp.numColors - 1);
-            index = (int) (value - layer->ramp.min) / step;
+            index = (int) ((value - layer->ramp.min) / step);
 /*
             if (index == (int) layer->ramp.numColors) {
                index = layer->ramp.numColors - 1;
@@ -1550,6 +1556,161 @@ static int DrawGradPointShpFile (char *filename, maparam *map,
       }
    }
    fclose (sfp);
+   return 0;
+}
+
+static void drawBarb (sInt4 x0, sInt4 y0, double spd, double dir1, 
+                      gdImagePtr im, int outIndex, int fgIndex,
+                      int len, int wid)
+{
+   gdPoint pnts[5];
+   double dir2;
+   double cosD1, sinD1, cosD2, sinD2;
+   int pos;
+   int f_first;
+
+   /* Make sure we're not being asked to draw 'missing' */
+   if ((spd == 9999) || (dir1 > 360) || (dir1 < -360)) return;
+
+   /* if speed is less than 2.5 knots draw calm */
+   if (spd < 2.5) {
+      pnts[0].x = myRound((x0 - 2), 0); pnts[0].y = myRound((y0 - 2), 0);
+      pnts[1].x = myRound((x0 + 2), 0); pnts[1].y = myRound((y0 - 2), 0);
+      pnts[2].x = myRound((x0 + 2), 0); pnts[2].y = myRound((y0 + 2), 0);
+      pnts[3].x = myRound((x0 - 2), 0); pnts[3].y = myRound((y0 + 2), 0);
+      pnts[4] = pnts[0];
+      gdImageFilledPolygon (im, pnts, 5, fgIndex);
+      gdImagePolygon (im, pnts, 5, outIndex);
+      gdImageSetPixel (im, x0, y0, outIndex);
+      return;
+   }
+   
+   /* convert from compass direction to Cartesian */
+   dir1 = 90 - dir1;
+   while (dir1 < 0) dir1+=360;
+   while (dir1 > 360) dir1-=360;
+
+   /* find flag direction (off of original by 60 degree) */
+   dir2 = dir1 - 60; 
+   while (dir2 < 0) dir2+=360;
+
+   /* Compute transcedental functions one-time. */
+   cosD1=cos(dir1*M_PI/180.);
+   sinD1=sin(dir1*M_PI/180.);
+   cosD2=cos(dir2*M_PI/180.);
+   sinD2=sin(dir2*M_PI/180.);
+
+   /* Draw the flags */
+   f_first=1;
+   pos=len;  /* position on the flag pole */
+   while (spd > 2.5) {
+      pnts[0].x = myRound(x0 + cosD1*pos, 0);
+      pnts[0].y = myRound(y0 - sinD1*pos, 0);
+      if (spd > 47.5) {
+         pnts[1].x = myRound(pnts[0].x + cosD2*len/2.25, 0);
+         pnts[1].y = myRound(pnts[0].y - sinD2*len/2.25, 0);
+         pnts[2].x = myRound(x0 + cosD1*(pos+wid*2), 0);
+         pnts[2].y = myRound(y0 - sinD1*(pos+wid*2), 0);
+         pnts[3] = pnts[0];
+         gdImageSetThickness(im, 1);
+         gdImageFilledPolygon (im, pnts, 4, fgIndex);
+         gdImagePolygon (im, pnts, 4, outIndex);
+         spd -= 50;
+      } else if (spd > 7.5) {
+         pnts[1].x = myRound(pnts[0].x + cosD2*len/2.25, 0);
+         pnts[1].y = myRound(pnts[0].y - sinD2*len/2.25, 0);
+         gdImageSetThickness(im, wid);
+         gdImageLine(im, pnts[0].x, pnts[0].y, pnts[1].x, pnts[1].y, outIndex);
+         if (wid >= 3) {
+            gdImageSetThickness(im, wid-2); 
+            gdImageLine(im, pnts[0].x, pnts[0].y, pnts[1].x, pnts[1].y, fgIndex);
+         }
+         spd -= 10;
+      } else if (! f_first && (spd > 2.5)) {
+         pnts[1].x = myRound(pnts[0].x + cosD2*len/4.5, 0);
+         pnts[1].y = myRound(pnts[0].y - sinD2*len/4.5, 0);
+         gdImageSetThickness(im, wid);
+         gdImageLine(im, pnts[0].x, pnts[0].y, pnts[1].x, pnts[1].y, outIndex);
+         if (wid >= 3) {
+            gdImageSetThickness(im, wid-2); 
+            gdImageLine(im, pnts[0].x, pnts[0].y, pnts[1].x, pnts[1].y, fgIndex);
+         }
+         spd -= 5;
+      }
+      f_first = 0;
+      pos-=wid*2;
+   }
+
+   /* Draw the flag pole */
+   pnts[0].x = myRound(x0 + cosD1*len, 0);
+   pnts[0].y = myRound(y0 - sinD1*len, 0);
+   gdImageSetThickness(im, wid);
+   gdImageLine(im, x0, y0, pnts[0].x, pnts[0].y, outIndex);
+   if (wid >= 3) {
+      gdImageSetThickness(im, wid-2);
+      gdImageLine(im, x0, y0, pnts[0].x, pnts[0].y, fgIndex);
+   }
+   gdImageSetThickness (im, 1);
+
+   /* Draw station point */
+   pnts[0].x = myRound((x0 - 2), 0); pnts[0].y = myRound((y0 - 2), 0);
+   pnts[1].x = myRound((x0 + 2), 0); pnts[1].y = myRound((y0 - 2), 0);
+   pnts[2].x = myRound((x0 + 2), 0); pnts[2].y = myRound((y0 + 2), 0);
+   pnts[3].x = myRound((x0 - 2), 0); pnts[3].y = myRound((y0 + 2), 0);
+   pnts[4] = pnts[0];
+   gdImageFilledPolygon (im, pnts, 5, fgIndex);
+   gdImagePolygon (im, pnts, 5, outIndex);
+}
+
+static int DrawWindBarb (char *filename, maparam *map, gdImagePtr im,
+                         SymbolType sym, mapIniType * mapIni,
+                         double projX1, double projY1, double A,
+                         double Bx, double By)
+{
+   FILE *fp;
+   char *buffer = NULL; /* Holds a line from the file. */
+   char *buff2 = NULL;  /* Holds an untouched copy of line. */
+   size_t buffLen = 0;  /* Current length of buffer. */
+   char *latStr;        /* The lat string in the buffer. */
+   char *lonStr;        /* The lon string in the buffer. */
+   char *spdStr;        /* The windSpeed string in the buffer. */
+   char *dirStr;        /* The windDirection string in the buffer. */
+   double X, Y;
+   sInt4 x, y;
+   int len;    /* length of flag pole */
+   int wid;    /* thickness of flag pole */
+
+   if ((fp = fopen (filename, "rt")) == NULL) {
+      printf ("Problems opening %s for read\n", filename);
+      return -1;
+   }
+
+   /* line is lat,lon,Spd,Dir */
+   len = sym.f_mark;
+   wid = 3;
+   while (reallocFGets (&buffer, &buffLen, fp) > 0) {
+      buff2 = (char *) realloc ((void *) buff2, buffLen);
+      strcpy (buff2, buffer);
+      latStr = strtok (buffer, ",\n");
+      /* Avoid commented out lines... */
+      if ((latStr != NULL) && (*latStr != '#')) {
+         if (((lonStr = strtok (NULL, ",\n")) != NULL) &&
+             ((spdStr = strtok (NULL, ",\n")) != NULL) &&
+             ((dirStr = strtok (NULL, ",\n")) != NULL)) {
+            cll2xy (map, atof(latStr), atof(lonStr), &X, &Y);
+            /* x, y are in projected space.  Scale them to pixel space. */
+            drawBarb((sInt4) (Bx + (X - projX1) / A),
+                     (sInt4) (mapIni->out.Y_Size - (By + (Y - projY1) / A)),
+                     atof(spdStr), atof(dirStr), im, sym.out.gdIndex,
+                     sym.fg.gdIndex, len, wid);
+         } else {
+            printf ("WindBarb parsing ERROR: %s", buff2);
+         }
+      }
+   }
+   free (buffer);
+   free (buff2);
+   fclose (fp);
    return 0;
 }
 
@@ -2951,7 +3112,7 @@ static int DrawLayer (layerType *layer, maparam *map, gdImagePtr im,
    size_t i;
    int ans = 0;
    sInt4 numFDraw = -1;
-   char *FDraw;
+   char *FDraw = NULL;
    double X, Y;
    sInt4 x, y;
 
@@ -3048,6 +3209,11 @@ static int DrawLayer (layerType *layer, maparam *map, gdImagePtr im,
          }
          free (Data);
          break;
+      case WINDBARB:
+         AllocGDColor (&layer->single.fg, im);
+         AllocGDColor (&layer->single.out, im);
+	 DrawWindBarb (layer->filename, map, im, layer->single, 
+                       mapIni, projX1, projY1, A, Bx, By);
       case SINGLE_SYMBOL:
          AllocGDColor (&layer->single.fg, im);
          AllocGDColor (&layer->single.out, im);
@@ -3328,7 +3494,7 @@ printf ("Why is this needed here?\n");
                                gdFrame[m].sizeY);
                }
 /*#ifdef WIN32*/
-#ifdef _WINDOWS_
+#ifdef MS_WINDOWS
                /* Set stdout to binary mode (the 1 means stdout) */
                setmode (1, O_BINARY);
 #endif

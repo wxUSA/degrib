@@ -12,7 +12,7 @@
 
 static char *LayerTypes[] = {
    "Invalid", "Single Symbol", "Graduated", "Text", "DB2", "Png", "Grid",
-   "Info", "Lattice", NULL
+   "Info", "Lattice", "Wind Barb", NULL
 };
 static char *ShpFileTypes[] = {
    "Invalid", "Polygon", "Point", "Memory", "Void", NULL
@@ -555,6 +555,7 @@ static void FreeLayer (layerType *layer)
          free (layer->pnt);
          break;
       case SINGLE_SYMBOL:
+      case WINDBARB:
          freeIniSymbol (& (layer->single));
          break;
       case DB2:
@@ -701,7 +702,10 @@ int ParseSymbol (SymbolType * symbol, char *value)
                   symbol->f_mark = 41;
                } else if (strcmp (ptr, "dot40") == 0) {
                   symbol->f_mark = 42;
-               } else {
+               } else if (ptr[strlen(ptr)-1] = 'p') {
+		  ptr[strlen(ptr)-1] = '\0';
+		  symbol->f_mark = atoi(ptr);
+	       } else {
                   symbol->f_mark = 0;
                }
                break;
@@ -1012,6 +1016,7 @@ static int ParseLayerSect (allLayerType * all, layerType *layer, char *var,
                layer->ramp.thick = 0;
                break;
             case SINGLE_SYMBOL:
+            case WINDBARB:
                layer->single.mark = NULL;
                break;
             case DB2:
@@ -1030,6 +1035,7 @@ static int ParseLayerSect (allLayerType * all, layerType *layer, char *var,
       case SYMBOL:
          switch (layer->type) {
             case SINGLE_SYMBOL:
+            case WINDBARB:
                ParseSymbol (&(layer->single), value);
                break;
             case GRADUATED:
@@ -1562,6 +1568,7 @@ int SaveMapIniFile (mapIniType * mapIni, char *filename)
          fprintf (fp, "Type=%s\n", LayerTypes[mapIni->all.layers[i].type]);
          switch (mapIni->all.layers[i].type) {
             case SINGLE_SYMBOL:
+            case WINDBARB:
                fprintf (fp, "Symbol=[%d,%d,%d][%d,%d,%d][%s][#][#][#][%d]\n",
                         mapIni->all.layers[i].single.out.r,
                         mapIni->all.layers[i].single.out.g,

@@ -24,7 +24,8 @@ enum {
    HAZ_MF, HAZ_SM, HAZ_MS, HAZ_ZF, HAZ_ZR, HAZ_ZY, HAZ_FR, HAZ_HT,
    HAZ_LB, HAZ_LW, HAZ_LO, HAZ_SC, HAZ_SW, HAZ_RB, HAZ_SI, HAZ_SN,
    HAZ_SB, HAZ_WI, HAZ_WW, HAZ_MA, HAZ_EW, HAZ_SS, HAZ_FL, HAZ_BH,
-   HAZ_RP, HAZ_NONE, /* MPA 1/2017 Added:  HAZ_EW, HAZ_SS, HAZ_FL MPA 3/2017 Added: HAZ_BH, HAZ_RP*/
+   HAZ_RP, HAZ_CW, HAZ_NONE,  /* MPA 1/2017 Added:  HAZ_EW, HAZ_SS, HAZ_FL MPA 3/2017 Added: HAZ_BH, HAZ_RP MBA 9/2024 Added: HAZ_CW */
+
    HAZ_UNKNOWN
 };
 
@@ -110,8 +111,11 @@ HazTable HazCode[] = {
    /* 61 */ {"FL", "Flood", HAZ_FL}, /* MPA 1/2017 comment{"FL", "Excessive Wind", HAZ_FL},comment */ 
    /* 62 */ {"SS", "Storm Surge", HAZ_SS},  /* MPA 1/2017 */ 
    /* 59 */ {"BH", "Beach Hazard", HAZ_BH},
-   /* 60 */ {"RP", "Rip Current", HAZ_RP},   
+   /* 60 */ {"RP", "Rip Current", HAZ_RP}, 
+   /* 63 */ {"CW", "Cold Weather", HAZ_CW}, /* MBA 9/2024 */    
    /* 63 */ {"None", "None", HAZ_NONE},
+   
+   
    
 };
 
@@ -751,6 +755,116 @@ static int HazTable4 (HazardStringType * haz)
 }
 
 
+/* MBA 9/2024 */
+/* Based on the method used in "makeHazImageCodes.C" */
+/* Based on email exchange: 9/2024 */
+static int HazardRank5 (uChar haz, uChar sig)
+{
+
+/*   printf ("HazardRank5\n");  */
+
+   if ((haz == HAZ_SS) && (sig == SIG_W)) return 17; 
+   if ((haz == HAZ_HF) && (sig == SIG_W)) return 18;
+   if ((haz == HAZ_HU) && (sig == SIG_W)) return 19;
+   if ((haz == HAZ_TY) && (sig == SIG_W)) return 20; 
+
+   if ((haz == HAZ_BZ) && (sig == SIG_W)) return 22;
+
+   if ((haz == HAZ_IS) && (sig == SIG_W)) return 24;
+   if ((haz == HAZ_UP) && (sig == SIG_W)) return 25;
+   if ((haz == HAZ_WS) && (sig == SIG_W)) return 26;
+   if ((haz == HAZ_LE) && (sig == SIG_W)) return 27;
+   if ((haz == HAZ_DS) && (sig == SIG_W)) return 28;
+
+   if ((haz == HAZ_HW) && (sig == SIG_W)) return 30;
+   if ((haz == HAZ_TR) && (sig == SIG_W)) return 31;
+   if ((haz == HAZ_SR) && (sig == SIG_W)) return 32;
+
+   if ((haz == HAZ_AF) && (sig == SIG_W)) return 38;
+
+   if ((haz == HAZ_CF) && (sig == SIG_W)) return 40;   
+   if ((haz == HAZ_LS) && (sig == SIG_W)) return 41;
+   if ((haz == HAZ_AF) && (sig == SIG_Y)) return 42;
+   if ((haz == HAZ_SU) && (sig == SIG_W)) return 43;
+   if ((haz == HAZ_EH) && (sig == SIG_W)) return 44;
+   if ((haz == HAZ_TO) && (sig == SIG_A)) return 45;
+   if ((haz == HAZ_SV) && (sig == SIG_A)) return 46;
+   if ((haz == HAZ_FF) && (sig == SIG_A)) return 47;
+   if ((haz == HAZ_GL) && (sig == SIG_W)) return 48;
+  
+   if ((haz == HAZ_EC) && (sig == SIG_W)) return 50;
+   if ((haz == HAZ_FZ) && (sig == SIG_W)) return 51;
+   if ((haz == HAZ_FW) && (sig == SIG_W)) return 52;
+   if ((haz == HAZ_SS) && (sig == SIG_A)) return 53;
+   if ((haz == HAZ_HU) && (sig == SIG_A)) return 54;
+   if ((haz == HAZ_HF) && (sig == SIG_A)) return 55;
+   if ((haz == HAZ_TY) && (sig == SIG_A)) return 56;
+   if ((haz == HAZ_TR) && (sig == SIG_A)) return 57; 
+   if ((haz == HAZ_SR) && (sig == SIG_A)) return 58;
+
+   if ((haz == HAZ_WW) && (sig == SIG_Y)) return 60;
+
+   if ((haz == HAZ_CW) && (sig == SIG_Y)) return 62;
+   if ((haz == HAZ_HT) && (sig == SIG_Y)) return 63; 
+   if ((haz == HAZ_FA) && (sig == SIG_Y)) return 64;
+   if ((haz == HAZ_CF) && (sig == SIG_Y)) return 65;
+   if ((haz == HAZ_LS) && (sig == SIG_Y)) return 66;
+   if ((haz == HAZ_SU) && (sig == SIG_Y)) return 67; 
+   if ((haz == HAZ_FG) && (sig == SIG_Y)) return 68;
+   if ((haz == HAZ_SM) && (sig == SIG_Y)) return 69;
+   if ((haz == HAZ_SC) && (sig == SIG_Y)) return 70;
+   if ((haz == HAZ_BW) && (sig == SIG_Y)) return 71;
+   if ((haz == HAZ_SE) && (sig == SIG_W)) return 72;
+
+   if ((haz == HAZ_DU) && (sig == SIG_Y)) return 74;
+   if ((haz == HAZ_LW) && (sig == SIG_Y)) return 75;
+   if ((haz == HAZ_WI) && (sig == SIG_Y)) return 76;
+   if ((haz == HAZ_FR) && (sig == SIG_Y)) return 77;
+   if ((haz == HAZ_ZF) && (sig == SIG_Y)) return 78;
+   if ((haz == HAZ_UP) && (sig == SIG_Y)) return 79;
+   if ((haz == HAZ_LO) && (sig == SIG_Y)) return 80;
+  
+   if ((haz == HAZ_WS) && (sig == SIG_A)) return 82; 
+   if ((haz == HAZ_RP) && (sig == SIG_S)) return 83; 
+   if ((haz == HAZ_BH) && (sig == SIG_S)) return 84;
+   if ((haz == HAZ_GL) && (sig == SIG_A)) return 85;
+
+   if ((haz == HAZ_SE) && (sig == SIG_A)) return 87;
+   if ((haz == HAZ_UP) && (sig == SIG_A)) return 88;
+   if ((haz == HAZ_FA) && (sig == SIG_A)) return 89;
+   if ((haz == HAZ_CF) && (sig == SIG_A)) return 90;
+   if ((haz == HAZ_LS) && (sig == SIG_A)) return 91;
+   if ((haz == HAZ_HW) && (sig == SIG_A)) return 92;
+   if ((haz == HAZ_EH) && (sig == SIG_A)) return 93;
+   if ((haz == HAZ_EC) && (sig == SIG_A)) return 94;
+   if ((haz == HAZ_FZ) && (sig == SIG_A)) return 95;
+   if ((haz == HAZ_FW) && (sig == SIG_A)) return 96;
+
+   if ((haz == HAZ_AS) && (sig == SIG_Y)) return 104;
+
+   return 9999;
+}
+
+/* MBA 9/2024 */
+static int HazTable5 (HazardStringType * haz)
+{
+   int minVal;
+   int i;
+   int ans;
+
+   minVal = 9999;
+   for (i = 0; i < haz->numValid; i++) {
+      ans = HazardRank5 (haz->haz[i], haz->sig[i]); /* MBA 9/2024*/
+      if (minVal > ans) {
+         minVal = ans;
+      }
+   }
+   if (minVal > 112)
+      minVal = 0;
+   return minVal;
+}
+
+
 
 static void InitHazardString (HazardStringType * haz)
 {
@@ -833,6 +947,9 @@ void ParseHazardString (HazardStringType * haz, char *data, int simpleVer)
       } else if (simpleVer == 4) {    /* MPA 1/2017 */
          haz->SimpleCode = HazTable4 (haz);   /* MPA 1/2017 */
       } /* MPA 1/2017 */
+        else if (simpleVer == 5) {    /* MBA 9/2024 */
+         haz->SimpleCode = HazTable5 (haz);   /* MBA 9/2024 */
+      } /* MBA 9/2024 */
       return;
    }
    start = data;
@@ -928,6 +1045,9 @@ void ParseHazardString (HazardStringType * haz, char *data, int simpleVer)
       }  else if (simpleVer == 4) { /* MPA 1/2017 */
          haz->SimpleCode = HazTable4 (haz); /* MPA 1/2017 */
       } /* MPA 1/2017 */
+         else if (simpleVer == 5) {    /* MBA 9/2024 */
+         haz->SimpleCode = HazTable5 (haz);   /* MBA 9/2024 */
+      } /* MBA 9/2024 */
       return;
    }
 
@@ -942,6 +1062,9 @@ void ParseHazardString (HazardStringType * haz, char *data, int simpleVer)
    } else if (simpleVer == 4) {   /* MPA 1/2017 */
       haz->SimpleCode = HazTable4 (haz);   /* MPA 1/2017 */
    }   /* MPA 1/2017 */
+   else if (simpleVer == 5) {    /* MBA 9/2024 */
+      haz->SimpleCode = HazTable5 (haz);   /* MBA 9/2024 */
+   } /* MBA 9/2024 */
 /*
    printf ("%s\n", data);
    PrintHazardString (haz);

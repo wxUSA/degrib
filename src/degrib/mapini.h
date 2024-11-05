@@ -82,7 +82,7 @@ typedef struct {
 } allOutputType;
 
 /* plotting methods. */
-enum {INVALID, SINGLE_SYMBOL, GRADUATED, TEXT, DB2, PNG, GRID, INFO, LATTICE};
+enum {INVALID, SINGLE_SYMBOL, GRADUATED, TEXT, DB2, PNG, GRID, INFO, LATTICE, WINDBARB};
 /* supported shape file types. */
 enum {INVALID_SHP, POLYGON, POINT, MEMORY, VOID};
 
