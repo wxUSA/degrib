@@ -2754,7 +2754,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-PACKAGE_DATE='20240920'
+PACKAGE_DATE='20241001'
 
 
 ac_config_headers="$ac_config_headers gd/config.h:gd/scripts/config.hin"
@@ -5931,8 +5931,8 @@ printf "%s\n" "TCL_LIB = \"$TCL_LIBS\", TK_LIBS = \"$TK_LIBS\"" >&6; }
     then
       TK_PREFIX=$TCL_PREFIX
     fi
-    TCL_LIBS="-L$TCL_PREFIX/lib -ltcl$TCL_VERSION -ltclstub$TCL_VERSION"
-    TK_LIBS="-L$TK_PREFIX/lib -ltk$TCL_VERSION -ltkstub$TCL_VERSION"
+    TCL_LIBS="-L$TCL_PREFIX/lib -L$TCL_PREFIX/lib64 -ltcl$TCL_VERSION -ltclstub$TCL_VERSION"
+    TK_LIBS="-L$TK_PREFIX/lib -L$TK_PREFIX/lib64 -ltk$TCL_VERSION -ltkstub$TCL_VERSION"
 
 
   fi
