@@ -1,0 +1,12 @@
+#cloud-config
+users:
+  - name: compile
+    shell: /bin/bash
+    groups: wheel
+    ssh_import_id:
+      - gh:kremit
+disable_root: true
+runcmd:
+  - 'export PUBLIC_IPV4=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)'
+  - 'echo Droplet: $(hostname), IP Address: $PUBLIC_IPV4 > /var/www/html/index.html'
+  - 'curl -o build-degrib.sh https://raw.githubusercontent.com/wxUSA/degrib/refs/heads/master/build/build.sh && chmod 0755 build-degrib.sh && ./build-degrib.sh'
